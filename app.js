@@ -1,41 +1,42 @@
 const express = require('express');
-const app = express();
 const http = require('http');
 const path = require('path');
 const socketio = require('socket.io');
 
+const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
+// Set EJS as templating engine
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views')); // Ensures views path is set
+
+// Serve static files from 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Home route
 app.get('/', (req, res) => {
-    res.render('index.ejs');
+    res.render('index'); // No need to add .ejs
 });
 
-// socket io:
-// connection to socket.io
+// Socket.io connections
 io.on('connection', (socket) => {
-    console.log("Connect to socket.io");
+    console.log('Connected to socket.io:', socket.id);
 
-
-    // send location event received from user
+    // Receive location from client and broadcast to others
     socket.on('send-location', (data) => {
+        io.emit('receive-location', { id: socket.id, ...data });
+    });
 
-        //  send received location to user
-        io.emit('receive-location', { id: socket.id, ...data })
-    })
-
-    // disconnect from socket.io
+    // Handle disconnection
     socket.on('disconnect', () => {
-        // send disconnect to user
-        io.emit("user-disconnected", socket.id);
-        console.log("Disconnected to socket.io", socket.id);
-    })
-})
+        io.emit('user-disconnected', socket.id);
+        console.log('Disconnected from socket.io:', socket.id);
+    });
+});
 
-
-server.listen(4000, () => {
-    console.log('server is running on port http://localhost:4000');
-})
+// Dynamic port for deployment compatibility
+const PORT =  4000;
+server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
