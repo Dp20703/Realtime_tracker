@@ -5,7 +5,13 @@ const socketio = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server);
+const io = socketio(server, {
+    cors: {
+        origin: "*",  // Adjust as needed for your frontend
+        methods: ["GET", "POST"]
+    }
+});
+
 
 // Set EJS as templating engine
 app.set('view engine', 'ejs');
