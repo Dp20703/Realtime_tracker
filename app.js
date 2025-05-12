@@ -36,7 +36,9 @@ io.on('connection', (socket) => {
 });
 
 // Dynamic port for deployment compatibility
-const PORT =  4000;
+// Dynamic port for deployment compatibility
+const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
